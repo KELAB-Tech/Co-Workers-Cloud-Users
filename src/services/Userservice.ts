@@ -1,3 +1,4 @@
+import Cookies from "js-cookie";
 import { api } from "@/utils/api";
 
 // ─────────────────────────────────────────────────────────────
@@ -24,51 +25,47 @@ export interface UserProfile {
   enabled: boolean;
   createdAt: string;
   updatedAt: string | null;
-  // campos opcionales extendidos
-  phone?: string;
-  avatarUrl?: string;
-  country?: string;
-  city?: string;
-  postalCode?: string;
-  taxId?: string;
-  facebook?: string;
-  twitter?: string;
-  linkedin?: string;
-  instagram?: string;
 }
 
+// ✅ Exactamente lo que acepta el backend
 export interface UserSelfUpdateRequest {
   name: string;
   email: string;
-  phone?: string;
-  country?: string;
-  city?: string;
-  postalCode?: string;
-  taxId?: string;
-  facebook?: string;
-  twitter?: string;
-  linkedin?: string;
-  instagram?: string;
+  phone?: string; // opcional
 }
 
 // ─────────────────────────────────────────────────────────────
 // API CALLS
 // ─────────────────────────────────────────────────────────────
 
-/** GET /api/users/me */
 export const getMyProfile = (): Promise<UserProfile> =>
   api.get("/users/me");
 
-/** PUT /api/users/me */
 export const updateMyProfile = (
   data: UserSelfUpdateRequest
 ): Promise<UserProfile> => api.put("/users/me", data);
 
 // ─────────────────────────────────────────────────────────────
-// AVATAR — local helpers (mientras no haya endpoint de upload)
+// AVATAR — solo local (el backend no tiene este campo aún)
 // ─────────────────────────────────────────────────────────────
 
 const AVATAR_KEY = "kelab_user_avatar";
+
+export const saveLocalAvatar = (dataUrl: string): void => {
+  try { localStorage.setItem(AVATAR_KEY, dataUrl); } catch { /* noop */ }
+};
+
+export const getLocalAvatar = (): string | null => {
+  try { return localStorage.getItem(AVATAR_KEY); } catch { return null; }
+};
+
+export const clearLocalAvatar = (): void => {
+  try { localStorage.removeItem(AVATAR_KEY); } catch { /* noop */ }
+};
+
+// ─────────────────────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────────────────────
 
 export const getInitials = (nameOrEmail: string): string => {
   if (!nameOrEmail) return "?";
@@ -84,27 +81,15 @@ export const getInitials = (nameOrEmail: string): string => {
     .join("");
 };
 
-export const saveLocalAvatar = (dataUrl: string): void => {
-  try { localStorage.setItem(AVATAR_KEY, dataUrl); } catch { /* noop */ }
-};
-
-export const getLocalAvatar = (): string | null => {
-  try { return localStorage.getItem(AVATAR_KEY); } catch { return null; }
-};
-
-// ─────────────────────────────────────────────────────────────
-// DISPLAY HELPERS
-// ─────────────────────────────────────────────────────────────
-
 export const ACTOR_LABELS: Record<ActorType, string> = {
-  RECICLADOR: "Reciclador / Gestor",
-  TRANSFORMADOR: "Transformador / Productor",
-  TRANSPORTADOR: "Transportador",
+  RECICLADOR:      "Reciclador / Gestor",
+  TRANSFORMADOR:   "Transformador / Productor",
+  TRANSPORTADOR:   "Transportador",
   ADMIN_SECTORIAL: "Admin Sectorial",
-  ADMIN_GENERAL: "Admin General",
+  ADMIN_GENERAL:   "Admin General",
 };
 
 export const TIPO_PERSONA_LABELS: Record<TipoPersona, string> = {
-  NATURAL: "Persona Natural",
+  NATURAL:  "Persona Natural",
   JURIDICA: "Persona Jurídica",
 };

@@ -34,6 +34,8 @@ export type StockItemResponse = {
   currentStock: number;
   minStock: number;
   status: "ACTIVE" | "OUT_OF_STOCK" | "INACTIVE";
+  mainImageUrl: string | null;  // ← NUEVO
+  categoryIcon: string | null;  // ← NUEVO
 };
 
 export type InventorySummaryResponse = {

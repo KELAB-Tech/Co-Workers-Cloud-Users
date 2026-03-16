@@ -2,6 +2,14 @@ import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import ProductsTable from "@/components/tables/products/ProductsTable";
 import Link from "next/link";
 import { Plus, Search, Filter, RefreshCw } from "lucide-react";
+import { Metadata } from "next";
+
+
+export const metadata: Metadata = {
+  title: "Gestiona tus productos | Co-Workers Cloud",
+  description:
+    "Administra los productos de tu tienda en Co-Workers Cloud",
+};
 
 export default function ProductsPage() {
   return (
@@ -46,69 +54,8 @@ export default function ProductsPage() {
 
         </div>
 
-        {/* SEARCH + FILTROS */}
-
-        <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03] md:flex-row md:items-center md:justify-between">
-
-          {/* SEARCH */}
-
-          <div className="flex items-center gap-3 rounded-lg border border-gray-200 px-3 py-2 dark:border-gray-700">
-
-            <Search className="text-gray-400" size={18} />
-
-            <input
-              type="text"
-              placeholder="Buscar productos..."
-              className="w-64 bg-transparent outline-none dark:text-gray-100 text-sm"
-            />
-
-          </div>
-
-          {/* FILTROS */}
-
-          <div className="flex items-center gap-3">
-
-            {/* Estado */}
-
-            <select className="rounded-lg border border-gray-200 px-3 py-2 text-sm dark:text-gray-100 dark:border-gray-700 dark:bg-transparent">
-              <option>Todos</option>
-              <option>Activo</option>
-              <option>Sin stock</option>
-            </select>
-
-            {/* Cantidad */}
-
-            <select className="rounded-lg border border-gray-200 px-3 py-2 text-sm dark:text-gray-100 dark:border-gray-700 dark:bg-transparent">
-              <option>10</option>
-              <option>25</option>
-              <option>50</option>
-            </select>
-
-            <button className="flex items-center gap-2 rounded-lg border px-3 py-2 text-sm hover:bg-gray-50 dark:text-gray-100 dark:border-gray-700 dark:hover:bg-gray-800">
-              <Filter size={16} />
-              Filtros
-            </button>
-
-          </div>
-
-        </div>
-
-        {/* INFO */}
-
-        <div className="flex items-center justify-between text-sm text-gray-500">
-
-          <p>
-            Mostrando <span className="font-medium text-gray-700">1–10</span> de{" "}
-            <span className="font-medium text-gray-700">48</span> productos
-          </p>
-
-        </div>
-
         {/* TABLE */}
-
         <ProductsTable />
-
-        
 
       </div>
 

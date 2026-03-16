@@ -1,78 +1,37 @@
 import Cookies from "js-cookie";
 
-const API_URL = "http://localhost:8080/api";
+export const API_URL = "http://localhost:8080/api";
+
+const getToken = () => Cookies.get("token") ?? "";
+
+const request = async (endpoint: string, options: RequestInit = {}) => {
+  const token = getToken();
+
+  const res = await fetch(`${API_URL}${endpoint}`, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...(token && { Authorization: `Bearer ${token}` }),
+      ...options.headers,
+    },
+  });
+
+  if (res.status === 204) return null;
+
+  const text = await res.text();
+  const data = text ? JSON.parse(text) : null;
+
+  if (!res.ok) {
+    throw new Error(data?.message || data?.error || `Error ${res.status}`);
+  }
+
+  return data;
+};
 
 export const api = {
-  get: async (endpoint: string) => {
-    const token = Cookies.get("token");
-
-    const res = await fetch(`${API_URL}${endpoint}`, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (!res.ok) {
-      throw new Error("Error en GET " + endpoint);
-    }
-
-    return res.json();
-  },
-
-  post: async (endpoint: string, data: any) => {
-    const token = Cookies.get("token");
-
-    const res = await fetch(`${API_URL}${endpoint}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (!res.ok) {
-      throw new Error("Error en POST " + endpoint);
-    }
-
-    return res.json();
-  },
-
-  put: async (endpoint: string, data: any) => {
-    const token = Cookies.get("token");
-
-    const res = await fetch(`${API_URL}${endpoint}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (!res.ok) {
-      throw new Error("Error en PUT " + endpoint);
-    }
-
-    return res.json();
-  },
-
-  delete: async (endpoint: string) => {
-    const token = Cookies.get("token");
-
-    const res = await fetch(`${API_URL}${endpoint}`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (!res.ok) {
-      throw new Error("Error en DELETE " + endpoint);
-    }
-
-    return res.json();
-  },
+  get:    (endpoint: string)              => request(endpoint),
+  post:   (endpoint: string, data: any)  => request(endpoint, { method: "POST",   body: JSON.stringify(data) }),
+  put:    (endpoint: string, data: any)  => request(endpoint, { method: "PUT",    body: JSON.stringify(data) }),
+  patch:  (endpoint: string, data?: any) => request(endpoint, { method: "PATCH",  body: data ? JSON.stringify(data) : undefined }),
+  delete: (endpoint: string)             => request(endpoint, { method: "DELETE" }),
 };

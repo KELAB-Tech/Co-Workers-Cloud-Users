@@ -240,8 +240,18 @@ export default function InventoryTable() {
                       {/* Producto */}
                       <TableCell className="px-5 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 flex-shrink-0 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center overflow-hidden">
-                            <Package size={16} className="text-gray-300" />
+                          <div className="h-10 w-10 flex-shrink-0 rounded-lg bg-gray-100 dark:bg-gray-800 overflow-hidden">
+                            {item.mainImageUrl ? (
+                              <img
+                                src={item.mainImageUrl}
+                                alt={item.productName}
+                                className="h-full w-full object-cover"
+                              />
+                            ) : (
+                              <div className="flex h-full w-full items-center justify-center text-lg">
+                                {item.categoryIcon ?? <Package size={16} className="text-gray-300" />}
+                              </div>
+                            )}
                           </div>
                           <span className="font-medium text-gray-800 dark:text-white/90 text-theme-sm">
                             {item.productName}

@@ -7,67 +7,83 @@ import TextArea from "@/components/form/input/TextArea";
 import ComponentCard from "@/components/common/ComponentCard";
 import Label from "@/components/form/Label";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import {
-  ChevronLeft,
-  Upload,
-  X,
-  ImageIcon,
-  Loader2,
-  CheckCircle,
-  AlertCircle,
+  ChevronLeft, Upload, X, ImageIcon,
+  Loader2, CheckCircle, AlertCircle,
 } from "lucide-react";
 import {
-  getCategories,
-  getMyStore,
-  createProduct,
-  uploadProductImage,
-  type Category,
+  getCategories, getMyStore, updateProduct,
+  uploadProductImage, type Category, type Product,
 } from "@/services/productService";
+import Cookies from "js-cookie";
 
+const API_URL = "http://localhost:8080/api";
 
-
-export default function CreateProduct() {
+export default function EditProduct() {
   const router = useRouter();
+  const params = useParams();
+  const productId = Number(params?.id);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // ── STATE ──────────────────────────────────────────
   const [categories, setCategories] = useState<Category[]>([]);
-  const [storeId, setStoreId] = useState<number | null>(null);
+  const [storeId, setStoreId]       = useState<number | null>(null);
+  const [loading, setLoading]       = useState(true);
 
   const [form, setForm] = useState({
-    name: "",
-    description: "",
-    price: "",
-    stock: "",
-    categoryId: "",
+    name: "", description: "", price: "", stock: "", categoryId: "",
   });
 
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [uploadingImage, setUploadingImage] = useState(false);
+  const [imagePreview,     setImagePreview]     = useState<string | null>(null);
+  const [uploadingImage,   setUploadingImage]   = useState(false);
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
 
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+  const [error,      setError]      = useState<string | null>(null);
+  const [success,    setSuccess]    = useState(false);
 
-  // ── LOAD INITIAL DATA ──────────────────────────────
+  // ── LOAD ───────────────────────────────────────────
   useEffect(() => {
-    getCategories()
-      .then(setCategories)
-      .catch(() => setError("No se pudieron cargar las categorías"));
+    const load = async () => {
+      try {
+        const [cats, store] = await Promise.all([
+          getCategories(),
+          getMyStore(),
+        ]);
+        setCategories(cats);
+        setStoreId(store.id);
 
-    getMyStore()
-      .then((store) => setStoreId(store.id))
-      .catch(() => setError("No tienes una tienda registrada"));
-  }, []);
+        // Cargar producto actual
+        const token = Cookies.get("token");
+        const res = await fetch(`${API_URL}/products/${productId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error("Producto no encontrado");
+        const p: Product = await res.json();
+
+        setForm({
+          name:        p.name,
+          description: p.description,
+          price:       String(p.price),
+          stock:       String(p.stock),
+          categoryId:  p.categoryId ? String(p.categoryId) : "",
+        });
+        setUploadedImageUrl(p.mainImageUrl);
+        setImagePreview(p.mainImageUrl);
+      } catch (e: any) {
+        setError(e.message || "Error cargando el producto");
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, [productId]);
 
   // ── HANDLERS ──────────────────────────────────────
 
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     setError(null);
@@ -78,30 +94,26 @@ export default function CreateProduct() {
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      setError("Solo se permiten archivos de imagen (JPG, PNG, WEBP)");
+      setError("Solo se permiten imágenes (JPG, PNG, WEBP)");
       return;
     }
-
     if (file.size > 5 * 1024 * 1024) {
       setError("La imagen no puede superar 5MB");
       return;
     }
 
     setError(null);
-
-    // Preview local inmediato
     const reader = new FileReader();
     reader.onload = (ev) => setImagePreview(ev.target?.result as string);
     reader.readAsDataURL(file);
 
-    // Upload automático a Cloudinary
     setUploadingImage(true);
     try {
       const url = await uploadProductImage(file);
       setUploadedImageUrl(url);
     } catch {
       setError("Error subiendo la imagen. Intenta de nuevo.");
-      setImagePreview(null);
+      setImagePreview(uploadedImageUrl); // vuelve a la anterior
     } finally {
       setUploadingImage(false);
     }
@@ -121,12 +133,11 @@ export default function CreateProduct() {
     if (!form.description.trim()) return setError("La descripción es obligatoria");
     if (!form.price || Number(form.price) <= 0) return setError("El precio debe ser mayor a 0");
     if (form.stock === "" || Number(form.stock) < 0) return setError("El stock no puede ser negativo");
-    if (!uploadedImageUrl)        return setError("Debes subir una imagen del producto");
-    if (!storeId)                 return setError("No tienes una tienda registrada");
+    if (!uploadedImageUrl)        return setError("El producto debe tener una imagen");
 
     setSubmitting(true);
     try {
-      await createProduct(storeId, {
+      await updateProduct(productId, {
         name:         form.name.trim(),
         description:  form.description.trim(),
         price:        Number(form.price),
@@ -134,22 +145,32 @@ export default function CreateProduct() {
         mainImageUrl: uploadedImageUrl,
         categoryId:   form.categoryId ? Number(form.categoryId) : null,
       });
-
       setSuccess(true);
       setTimeout(() => router.push("/products"), 1500);
     } catch (err: any) {
-      setError(err.message || "Error creando el producto");
+      setError(err.message || "Error actualizando el producto");
     } finally {
       setSubmitting(false);
     }
   };
 
+  // ── LOADING STATE ──────────────────────────────────
+  if (loading) {
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <div className="flex flex-col items-center gap-3 text-gray-400">
+          <Loader2 className="h-8 w-8 animate-spin" />
+          <p className="text-sm">Cargando producto...</p>
+        </div>
+      </div>
+    );
+  }
+
   // ── RENDER ─────────────────────────────────────────
   return (
     <div>
-      <PageBreadcrumb pageTitle="Crear Producto" />
+      <PageBreadcrumb pageTitle="Editar Producto" />
 
-      {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <Link
           href="/products"
@@ -159,11 +180,10 @@ export default function CreateProduct() {
           Volver a productos
         </Link>
         <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">
-          Nuevo producto
+          Editar producto
         </h2>
       </div>
 
-      {/* Alerts */}
       {error && (
         <div className="mb-5 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
           <AlertCircle className="h-4 w-4 flex-shrink-0" />
@@ -173,7 +193,7 @@ export default function CreateProduct() {
       {success && (
         <div className="mb-5 flex items-center gap-3 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
           <CheckCircle className="h-4 w-4 flex-shrink-0" />
-          ¡Producto creado exitosamente! Redirigiendo...
+          ¡Producto actualizado! Redirigiendo...
         </div>
       )}
 
@@ -195,7 +215,7 @@ export default function CreateProduct() {
               <TextArea
                 label="Descripción"
                 name="description"
-                placeholder="Describe el material, presentación, condiciones de venta..."
+                placeholder="Describe el material..."
                 value={form.description}
                 onChange={handleChange}
               />
@@ -239,9 +259,6 @@ export default function CreateProduct() {
                     </option>
                   ))}
                 </select>
-                <p className="text-xs text-gray-400">
-                  Clasifica el material para que aparezca en los filtros del marketplace
-                </p>
               </div>
 
             </div>
@@ -258,21 +275,18 @@ export default function CreateProduct() {
                     alt="Preview"
                     className="h-56 w-full rounded-xl object-cover border border-gray-200 dark:border-gray-700"
                   />
-
                   {uploadingImage && (
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-xl bg-black/50">
                       <Loader2 className="h-8 w-8 animate-spin text-white" />
                       <p className="text-sm font-medium text-white">Subiendo a Cloudinary...</p>
                     </div>
                   )}
-
                   {uploadedImageUrl && !uploadingImage && (
                     <div className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-full bg-green-500 px-3 py-1">
                       <CheckCircle className="h-3.5 w-3.5 text-white" />
                       <span className="text-xs font-semibold text-white">Imagen lista</span>
                     </div>
                   )}
-
                   <button
                     type="button"
                     onClick={handleRemoveImage}
@@ -288,19 +302,14 @@ export default function CreateProduct() {
                   className="flex h-56 w-full flex-col items-center justify-center gap-3 rounded-xl
                              border-2 border-dashed border-gray-300 bg-gray-50 transition-all
                              hover:border-blue-400 hover:bg-blue-50/50
-                             dark:border-gray-700 dark:bg-gray-800 dark:hover:border-blue-500"
+                             dark:border-gray-700 dark:bg-gray-800"
                 >
                   <div className="rounded-full bg-gray-100 p-4 dark:bg-gray-700">
                     <ImageIcon className="h-8 w-8 text-gray-400" />
                   </div>
-                  <div className="text-center">
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                      Haz clic para subir imagen
-                    </p>
-                    <p className="mt-0.5 text-xs text-gray-400">
-                      JPG, PNG o WEBP · Máx 5MB
-                    </p>
-                  </div>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                    Haz clic para subir nueva imagen
+                  </p>
                   <div className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white">
                     <Upload className="h-4 w-4" />
                     Seleccionar imagen
@@ -316,13 +325,18 @@ export default function CreateProduct() {
                 className="hidden"
               />
 
-              {uploadedImageUrl && (
-                <div className="rounded-lg bg-gray-50 px-3 py-2 dark:bg-gray-800">
-                  <p className="text-xs text-gray-400 mb-1">URL Cloudinary:</p>
-                  <p className="break-all font-mono text-xs text-gray-600 dark:text-gray-300">
-                    {uploadedImageUrl}
-                  </p>
-                </div>
+              {/* botón cambiar imagen si ya hay una */}
+              {imagePreview && !uploadingImage && (
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300
+                             py-2 text-sm text-gray-500 hover:bg-gray-50 transition-colors
+                             dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
+                >
+                  <Upload className="h-4 w-4" />
+                  Cambiar imagen
+                </button>
               )}
 
             </div>
@@ -340,20 +354,19 @@ export default function CreateProduct() {
           >
             Cancelar
           </Link>
-
           <button
             type="submit"
-            disabled={submitting || uploadingImage || !storeId}
+            disabled={submitting || uploadingImage}
             className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-2.5
                        text-sm font-medium text-white transition-all hover:bg-blue-700
                        disabled:cursor-not-allowed disabled:opacity-60"
           >
             {submitting ? (
-              <><Loader2 className="h-4 w-4 animate-spin" /> Creando...</>
+              <><Loader2 className="h-4 w-4 animate-spin" /> Guardando...</>
             ) : uploadingImage ? (
               <><Loader2 className="h-4 w-4 animate-spin" /> Subiendo imagen...</>
             ) : (
-              "Crear producto"
+              "Guardar cambios"
             )}
           </button>
         </div>
