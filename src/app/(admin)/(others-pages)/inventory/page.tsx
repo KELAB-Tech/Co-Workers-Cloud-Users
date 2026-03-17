@@ -6,7 +6,7 @@ import InventoryTable from "@/components/tables/InventoryTable";
 import {
   getInventorySummary,
   InventorySummaryResponse,
-} from "@/services/Inventoryservice";
+} from "@/services/inventoryService";
 import {
   Package,
   CheckCircle,

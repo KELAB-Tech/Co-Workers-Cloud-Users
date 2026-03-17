@@ -9,7 +9,7 @@ import {
   UserProfile,
   UserSelfUpdateRequest,
   updateMyProfile,
-} from "@/services/Userservice";
+} from "@/services/userService";
 
 // ── SVG edit icon ─────────────────────────────────────────────
 const EditIcon = () => (

@@ -15,7 +15,7 @@ import {
   StockItemResponse,
   getMovementsByProduct,
   MovementResponse,
-} from "@/services/Inventoryservice";
+} from "@/services/inventoryService";
 import AdjustStockModal from "@/components/inventory/AdjustStockModal";
 import { Package, AlertCircle, X, ArrowDownCircle, ArrowUpCircle, RefreshCw } from "lucide-react";
 

@@ -7,7 +7,7 @@ import MonthlySalesChart from "@/components/ecommerce/MonthlySalesChart";
 import StatisticsChart from "@/components/ecommerce/StatisticsChart";
 import RecentOrders from "@/components/ecommerce/RecentOrders";
 import DemographicCard from "@/components/ecommerce/DemographicCard";
-import { getDashboardData, DashboardData } from "@/services/Dashboardservice";
+import { getDashboardData, DashboardData } from "@/services/dashboardService";
 import { RefreshCw } from "lucide-react";
 
 export default function Ecommerce() {

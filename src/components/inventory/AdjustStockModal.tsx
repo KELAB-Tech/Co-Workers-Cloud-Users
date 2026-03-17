@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { registerMovement, MovementType } from "@/services/Inventoryservice";
+import { registerMovement, MovementType } from "@/services/inventoryService";
 import { X } from "lucide-react";
 
 type Props = {

@@ -10,7 +10,7 @@ import { Camera } from "lucide-react";
 import {
   UserProfile, UserSelfUpdateRequest,
   updateMyProfile, getInitials,
-} from "@/services/Userservice";
+} from "@/services/userService";
 
 // ── Avatar local storage ──────────────────────────────────────
 const AVATAR_KEY = "kelab_user_avatar";

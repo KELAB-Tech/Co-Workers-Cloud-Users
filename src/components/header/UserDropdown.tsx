@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { session } from "@/utils/session";
 import {
   getMyProfile, getInitials, getLocalAvatar, UserProfile,
-} from "@/services/Userservice";
+} from "@/services/userService";
 
 function Avatar({ profile, avatarUrl }: { profile: UserProfile | null; avatarUrl: string | null }) {
   if (!profile) {

@@ -6,7 +6,7 @@ import { Dropdown } from "../ui/dropdown/Dropdown";
 import { MoreDotIcon } from "@/icons";
 import { useState } from "react";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
-import { InventorySummaryResponse } from "@/services/InventoryService";
+import { InventorySummaryResponse } from "@/services/inventoryService";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 

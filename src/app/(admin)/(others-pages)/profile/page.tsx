@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import UserAddressCard from "@/components/user-profile/UserAddressCard";
 import UserInfoCard from "@/components/user-profile/UserInfoCard";
 import UserMetaCard from "@/components/user-profile/UserMetaCard";
-import { getMyProfile, UserProfile } from "@/services/Userservice";
+import { getMyProfile, UserProfile } from "@/services/userService";
 import { AlertCircle } from "lucide-react";
 
 // ── Skeleton ──────────────────────────────────────────────────

@@ -4,7 +4,7 @@ import React from "react";
 import Badge from "../ui/badge/Badge";
 import { ArrowDownIcon, ArrowUpIcon, BoxIconLine } from "@/icons";
 import { PackageIcon, ShoppingCartIcon, TrendingUp, AlertTriangle } from "lucide-react";
-import { InventorySummaryResponse } from "@/services/Inventoryservice";
+import { InventorySummaryResponse } from "@/services/inventoryService";
 
 type Props = {
   data: InventorySummaryResponse | null;

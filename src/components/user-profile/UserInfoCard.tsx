@@ -11,7 +11,7 @@ import {
   updateMyProfile,
   ACTOR_LABELS,
   TIPO_PERSONA_LABELS,
-} from "@/services/Userservice";
+} from "@/services/userService";
 
 // ── SVG edit icon ─────────────────────────────────────────────
 const EditIcon = () => (

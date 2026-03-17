@@ -9,7 +9,7 @@ import {
 } from "../ui/table";
 
 import Badge from "../ui/badge/Badge";
-import { InventorySummaryResponse, MovementResponse } from "@/services/InventoryService";
+import { InventorySummaryResponse, MovementResponse } from "@/services/inventoryService";
 import { ArrowDownCircle, ArrowUpCircle, RefreshCw, Package } from "lucide-react";
 
 type Props = {
