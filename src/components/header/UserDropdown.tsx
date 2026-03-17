@@ -37,7 +37,8 @@ export default function UserDropdown() {
     getMyProfile()
       .then((p) => {
         setProfile(p);
-        setAvatarUrl(p.avatarUrl ?? getLocalAvatar());
+        // ✅ después
+        setAvatarUrl(getLocalAvatar());
       })
       .catch(() => {
         setAvatarUrl(getLocalAvatar());
