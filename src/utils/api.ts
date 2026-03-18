@@ -1,6 +1,6 @@
 import Cookies from "js-cookie";
 
-export const API_URL = "http://localhost:8080/api";
+export const API_URL = "https://backend-co-workers-cloud.onrender.com/api";
 
 const getToken = () => Cookies.get("token") ?? "";
 
