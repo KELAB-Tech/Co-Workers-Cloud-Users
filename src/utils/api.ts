@@ -1,8 +1,6 @@
-import Cookies from "js-cookie";
+import { getToken } from "@/utils/auth";
 
 export const API_URL = "https://backend-co-workers-cloud.onrender.com/api";
-
-const getToken = () => Cookies.get("token") ?? "";
 
 const request = async (endpoint: string, options: RequestInit = {}) => {
   const token = getToken();

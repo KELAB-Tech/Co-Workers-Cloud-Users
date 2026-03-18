@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import Cookies from "js-cookie";
 import { deleteProduct, formatPrice, type Product } from "@/services/productService";
+import { getToken } from "@/utils/auth";
 
 const API_URL = "https://backend-co-workers-cloud.onrender.com/api";
 
@@ -94,58 +95,55 @@ export default function ProductsTable() {
 
   // ── FETCH ─────────────────────────────────────────
   const fetchProducts = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const token = Cookies.get("token");
+  setLoading(true);
+  setError(null);
 
-      const params = new URLSearchParams();
-      params.set("page",    String(page));
-      params.set("size",    String(pageSize));
-      params.set("sortBy",  "createdAt");
-      params.set("sortDir", "desc");
-      if (debouncedSearch) params.set("name", debouncedSearch);
-      if (statusFilter)    params.set("status", `[${statusFilter}]`);
+  try {
+    const token = getToken();
 
-      const res = await fetch(`${API_URL}/products/my-store?${params.toString()}`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+    const res = await fetch(`${API_URL}/products/my-store`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-      if (!res.ok) throw new Error("Error cargando productos");
+    if (!res.ok) throw new Error("Error cargando productos");
 
-      const data: PagedProducts | Product[] = await res.json();
+    const data: Product[] = await res.json();
 
-      // Backend puede devolver Page<> o List<>
-      if (Array.isArray(data)) {
-        // Sin paginación del backend — paginamos localmente
-        let filtered = data as Product[];
-        if (debouncedSearch)
-          filtered = filtered.filter((p) =>
-            p.name.toLowerCase().includes(debouncedSearch.toLowerCase())
-          );
-        if (statusFilter)
-          filtered = filtered.filter((p) => p.status === statusFilter);
+    // ── FILTROS ─────────────────────────────
+    let filtered = data;
 
-        const start = page * pageSize;
-        const slice = filtered.slice(start, start + pageSize);
-
-        setProducts(slice);
-        setTotalElements(filtered.length);
-        setTotalPages(Math.ceil(filtered.length / pageSize));
-      } else {
-        setProducts(data.content);
-        setTotalElements(data.totalElements);
-        setTotalPages(data.totalPages);
-      }
-    } catch (e: any) {
-      setError(e.message || "Error cargando productos");
-    } finally {
-      setLoading(false);
+    if (debouncedSearch) {
+      filtered = filtered.filter((p) =>
+        p.name.toLowerCase().includes(debouncedSearch.toLowerCase())
+      );
     }
-  }, [page, pageSize, debouncedSearch, statusFilter]);
+
+    if (statusFilter) {
+      filtered = filtered.filter((p) => p.status === statusFilter);
+    }
+
+    // ── ORDENAMIENTO (opcional pero recomendado) ──
+    filtered = filtered.sort((a, b) => {
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+
+    // ── PAGINACIÓN LOCAL ────────────────────
+    const start = page * pageSize;
+    const slice = filtered.slice(start, start + pageSize);
+
+    setProducts(slice);
+    setTotalElements(filtered.length);
+    setTotalPages(Math.ceil(filtered.length / pageSize));
+
+  } catch (e: any) {
+    setError(e.message || "Error cargando productos");
+  } finally {
+    setLoading(false);
+  }
+}, [page, pageSize, debouncedSearch, statusFilter]);
 
   useEffect(() => { fetchProducts(); }, [fetchProducts]);
 
