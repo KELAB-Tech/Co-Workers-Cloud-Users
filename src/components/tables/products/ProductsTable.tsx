@@ -10,7 +10,7 @@ import {
 import Cookies from "js-cookie";
 import { deleteProduct, formatPrice, type Product } from "@/services/productService";
 
-const API_URL = "http://localhost:8080/api";
+const API_URL = "https://backend-co-workers-cloud.onrender.com/api";
 
 interface PagedProducts {
   content: Product[];

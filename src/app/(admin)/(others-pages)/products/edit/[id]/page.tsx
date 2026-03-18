@@ -18,7 +18,7 @@ import {
 } from "@/services/productService";
 import Cookies from "js-cookie";
 
-const API_URL = "http://localhost:8080/api";
+const API_URL = "https://backend-co-workers-cloud.onrender.com/api";
 
 export default function EditProduct() {
   const router = useRouter();
