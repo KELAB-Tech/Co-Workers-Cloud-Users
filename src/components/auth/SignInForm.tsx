@@ -160,7 +160,7 @@ export default function SignInForm() {
                 </div>
 
                 <Link
-                  href="/reset-password"
+                  href="#"
                   className="
                   text-sm
                   text-[#000180]
@@ -193,26 +193,6 @@ export default function SignInForm() {
 
             </div>
           </form>
-
-          {/* REGISTER */}
-          <div className="mt-6">
-            <p className="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start">
-
-              ¿No tienes una cuenta?{" "}
-
-              <Link
-                href="/signup"
-                className="
-                text-[#000180]
-                hover:text-[#45C93E]
-                dark:text-[#45C93E]
-                "
-              >
-                Registrarme
-              </Link>
-
-            </p>
-          </div>
 
         </div>
       </div>
