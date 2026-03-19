@@ -201,7 +201,7 @@ export default function MyStore() {
                   </Link>
                   {store?.status === "APPROVED" && (
                     <Link
-                      href={`/marketplace/tienda/${store.id}`}
+                      href={`https://cloud.kelab.com.co/tienda/${store.id}`}
                       target="_blank"
                       className="inline-flex items-center gap-1.5 rounded-xl bg-[#45C93E] px-4 py-2
                                  text-sm font-medium text-white hover:opacity-90 transition-all"
@@ -230,9 +230,9 @@ export default function MyStore() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
             { label: "Productos",    value: activeProducts,                    icon: Package,      href: "/products",   color: "text-blue-600" },
-            { label: "Pedidos",      value: "Próximamente",                    icon: ShoppingCart, href: "/orders",     color: "text-[#45C93E]" },
+            { label: "Pedidos",      value: "Próximamente",                    icon: ShoppingCart, href: "#",     color: "text-[#45C93E]" },
             { label: "Inventario",   value: "Ver stock",                       icon: Warehouse,    href: "/inventory",  color: "text-purple-600" },
-            { label: "Marketplace",  value: store?.status === "APPROVED" ? "Activa" : "Pendiente", icon: ExternalLink, href: `/marketplace/tienda/${store?.id}`, color: "text-[#000180]" },
+            { label: "Marketplace",  value: store?.status === "APPROVED" ? "Activa" : "Pendiente", icon: ExternalLink, href: `https://cloud.kelab.com.co/tienda/${store?.id}`, color: "text-[#000180]" },
           ].map((s, i) => (
             <Link
               key={i}
